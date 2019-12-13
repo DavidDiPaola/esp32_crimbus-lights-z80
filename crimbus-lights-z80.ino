@@ -97,6 +97,8 @@ void setup() {
   }
   Serial.print(" done (IP: ");
   Serial.print(WiFi.localIP());
+  Serial.print(", MAC: ");
+  Serial.print(WiFi.macAddress());
   Serial.println(")");
   delay(500);
 
