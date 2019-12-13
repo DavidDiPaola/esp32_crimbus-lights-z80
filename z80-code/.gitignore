@@ -1,0 +1,6 @@
+*.coff
+*.bin
+*.img
+
+.*.swp
+
