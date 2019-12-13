@@ -8,24 +8,22 @@ extern "C" {
 
 #include <WiFi.h>
 #include <WiFiMulti.h>
-#include "src/wificred.h"
 
-const int config_net_TIMEOUT = 1000;
+#include "config.h"
+
 #define LED_BUILTIN 2
-#define pixels_PIN 15
-#define pixels_LEDCOUNT 50
 
 z80 cpu;
 #define memory_LENGTH 0x10000
 uint8_t memory[memory_LENGTH];
 #define io_LENGTH 0x100
 uint8_t io[io_LENGTH];
-Adafruit_NeoPixel pixels;
+Adafruit_NeoPixel ledstrip;
 WiFiMulti wifim;
-WiFiServer server(8080);
+WiFiServer server(config_net_PORT);
 
-static void pixels_update(uint8_t port) {
-  if (port >= (pixels_LEDCOUNT * 3)) {
+static void ledstrip_update(uint8_t port) {
+  if (port >= (config_ledstrip_LEDCOUNT * 3)) {
     return;
   }
 
@@ -34,8 +32,8 @@ static void pixels_update(uint8_t port) {
   int r = io[io_i+0];
   int g = io[io_i+1];
   int b = io[io_i+2];
-  pixels.setPixelColor(pixel, pixels.Color(r, g, b));
-  pixels.show();
+  ledstrip.setPixelColor(pixel, ledstrip.Color(r, g, b));
+  ledstrip.show();
 }
 
 static uint8_t memory_read(void * userdata, uint16_t addr) {
@@ -52,7 +50,7 @@ static uint8_t io_read(z80 * z, uint8_t port) {
 
 static void io_write(z80 * z, uint8_t port, uint8_t val) {
   io[port] = val;
-  pixels_update(port);
+  ledstrip_update(port);
 }
 
 static void cpu_init() {
@@ -81,18 +79,18 @@ void setup() {
   Serial.println("done");
 
   Serial.print("\t" "LEDs... ");
-  pixels = Adafruit_NeoPixel(
-    pixels_LEDCOUNT,
-    pixels_PIN,
+  ledstrip = Adafruit_NeoPixel(
+    config_ledstrip_LEDCOUNT,
+    config_ledstrip_PIN,
     NEO_GRB + NEO_KHZ800
   );
-  pixels.begin();
-  pixels.clear();
-  pixels.show();
+  ledstrip.begin();
+  ledstrip.clear();
+  ledstrip.show();
   Serial.println("done");
 
   Serial.print("\t" "WiFi...");
-  wifim.addAP(wificred_SSID, wificred_PASSWORD);
+  wifim.addAP(config_wifi_SSID, config_wifi_PASSWORD);
   while (wifim.run() != WL_CONNECTED) {
     Serial.print(".");
   }
