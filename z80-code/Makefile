@@ -4,14 +4,13 @@ SRC = test.s
 BIN = test.bin
 
 COFF = $(BIN:.bin=.coff)
-IMG = $(BIN:.bin=.img)
 PREFIX ?= z80-unknown-coff-
 
 .phony: all
 all: $(BIN)
 
 .phony: send
-send: $(IMG)
+send: $(BIN)
 	cat $< | nc -w 10 10.11.12.129 8080
 
 .phony: clean
@@ -32,8 +31,4 @@ $(COFF): $(SRC)
 
 $(BIN): $(COFF)
 	$(PREFIX)objcopy -O binary $< $@
-
-$(IMG): $(BIN)
-	dd if=/dev/zero of=zero.img bs=1K count=64
-	cat $< zero.img > $@
 

@@ -10,6 +10,7 @@ extern "C" {
 #include <WiFiMulti.h>
 #include "src/wificred.h"
 
+const int config_net_TIMEOUT = 1000;
 #define LED_BUILTIN 2
 #define pixels_PIN 15
 #define pixels_LEDCOUNT 50
@@ -116,18 +117,26 @@ void loop() {
   WiFiClient client = server.available();
   if (client) {
     Serial.println("client connected");
-  
+
     memory_loaded = false;
     size_t i = 0;
     while (client.connected()) {
-      while (!client.available()) {}
+      int t = 0;
+      while (!client.available()) {
+        delay(1);
+        t++;
+        if (t >= config_net_TIMEOUT) {
+          goto done;
+        }
+      }
       uint8_t b = client.read();
       memory[i++] = b;
-  
       if (i >= memory_LENGTH) {
         break;
       }
     }
+
+    done:
     cpu_init();
     memory_loaded = true;
     Serial.println("data received");
